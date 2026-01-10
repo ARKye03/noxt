@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { DeleteNoteButton } from "@/components/delete-note-button";
+import { MarkdownPreview } from "@/components/markdown-preview";
 import Link from "next/link";
 
 export default async function NotePage({
@@ -49,9 +50,7 @@ export default async function NotePage({
             <CardTitle className="text-3xl">{note.title}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
-            <div className="prose prose-gray dark:prose-invert max-w-none">
-              <p className="whitespace-pre-wrap">{note.content}</p>
-            </div>
+            <MarkdownPreview content={note.content} />
             <div className="flex gap-2 pt-4 border-t">
               <Button asChild>
                 <Link href={`/notes/${id}/edit`}>Edit</Link>

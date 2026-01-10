@@ -159,6 +159,8 @@ The core feature of the app is a simple note-taking system:
 **Components**:
 - `DeleteNoteButton` - Client component with confirmation dialog before deletion
 - `NotesList` - Client component with fuzzy search using fuse.js
+- `MarkdownPreview` - Client component for rendering markdown with syntax highlighting
+- `NoteEditor` - Client component with live markdown preview
 
 **Search Functionality**:
 - Fuzzy search powered by fuse.js
@@ -167,6 +169,15 @@ The core feature of the app is a simple note-taking system:
 - Shows result count
 - "Clear" button to reset search
 - Empty state when no results found
+
+**Markdown Support**:
+- Full GitHub Flavored Markdown (GFM) support via `remark-gfm`
+- Syntax highlighting for code blocks via `rehype-highlight` and `highlight.js`
+- Live preview while editing (side-by-side on desktop)
+- Toggle preview visibility
+- Supports: headings, lists, tables, task lists, code blocks, links, images, etc.
+- External links open in new tab
+- Uses `github-dark` theme for code highlighting
 
 **Flow**:
 1. User logs in

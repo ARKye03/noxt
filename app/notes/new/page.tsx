@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
+import { NoteEditor } from "@/components/note-editor";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 
@@ -53,16 +53,7 @@ export default async function NewNotePage({
                   autoFocus
                 />
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="content">Content</Label>
-                <Textarea
-                  id="content"
-                  name="content"
-                  placeholder="Write your note here..."
-                  rows={12}
-                  required
-                />
-              </div>
+              <NoteEditor />
               <div className="flex gap-2">
                 <Button type="submit" className="w-full">
                   Create Note
