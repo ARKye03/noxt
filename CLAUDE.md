@@ -158,11 +158,21 @@ The core feature of the app is a simple note-taking system:
 
 **Components**:
 - `DeleteNoteButton` - Client component with confirmation dialog before deletion
+- `NotesList` - Client component with fuzzy search using fuse.js
+
+**Search Functionality**:
+- Fuzzy search powered by fuse.js
+- Searches both note titles and content
+- Real-time filtering as you type
+- Shows result count
+- "Clear" button to reset search
+- Empty state when no results found
 
 **Flow**:
 1. User logs in
 2. Sees list of their notes (or empty state)
-3. Creates a new note with title and content
-4. Note appears in the list
-5. Can click to view full note
-6. Can edit note (pre-filled form) or delete note (with confirmation)
+3. Can search notes using the search bar
+4. Creates a new note with title and content
+5. Note appears in the list
+6. Can click to view full note
+7. Can edit note (pre-filled form) or delete note (with confirmation)

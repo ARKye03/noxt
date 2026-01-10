@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { validateRequest } from "@/lib/auth";
 import { logout } from "@/lib/actions/auth";
 import { getNotes } from "@/lib/actions/notes";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { NotesList } from "@/components/notes-list";
 import Link from "next/link";
 
 export default async function Home() {
@@ -36,42 +36,7 @@ export default async function Home() {
           </div>
         </div>
 
-        {notes.length === 0 ? (
-          <Card>
-            <CardContent className="flex flex-col items-center justify-center py-12">
-              <p className="text-muted-foreground mb-4">
-                No notes yet. Create your first note to get started!
-              </p>
-              <Button asChild>
-                <Link href="/notes/new">Create Note</Link>
-              </Button>
-            </CardContent>
-          </Card>
-        ) : (
-          <div className="grid gap-4 md:grid-cols-2">
-            {notes.map((note) => (
-              <Link href={`/notes/${note.id}`} key={note.id}>
-                <Card className="h-full hover:bg-accent/50 transition-colors cursor-pointer">
-                  <CardHeader>
-                    <CardTitle className="line-clamp-1">{note.title}</CardTitle>
-                    <CardDescription>
-                      {new Date(note.updatedAt).toLocaleDateString("en-US", {
-                        month: "short",
-                        day: "numeric",
-                        year: "numeric",
-                      })}
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-sm text-muted-foreground line-clamp-3">
-                      {note.content}
-                    </p>
-                  </CardContent>
-                </Card>
-              </Link>
-            ))}
-          </div>
-        )}
+        <NotesList notes={notes} />
       </div>
     </div>
   );
