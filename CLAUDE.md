@@ -138,3 +138,24 @@ The app uses Lucia Auth with Prisma adapter for session-based authentication:
 - `Note` - id, title, content, userId
 
 **Protected Routes**: All routes except `/login`, `/signup`, and `/login/google/*` require authentication.
+
+### Notes Feature
+
+The core feature of the app is a simple note-taking system:
+
+**Routes**:
+- `/` - Home page displaying all user's notes in a grid
+- `/notes/new` - Create a new note
+- `/notes/[id]` - View a single note
+
+**Server Actions** (`lib/actions/notes.ts`):
+- `createNote(formData)` - Creates a new note
+- `getNotes(userId)` - Fetches all notes for a user
+- `getNote(id, userId)` - Fetches a single note
+
+**Flow**:
+1. User logs in
+2. Sees list of their notes (or empty state)
+3. Creates a new note with title and content
+4. Note appears in the list
+5. Can click to view full note

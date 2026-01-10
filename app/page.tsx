@@ -1,46 +1,78 @@
 import { Button } from "@/components/ui/button";
 import { validateRequest } from "@/lib/auth";
 import { logout } from "@/lib/actions/auth";
+import { getNotes } from "@/lib/actions/notes";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import Link from "next/link";
 
 export default async function Home() {
   const { user } = await validateRequest();
 
+  if (!user) {
+    return null;
+  }
+
+  const notes = await getNotes(user.id);
+
   return (
-    <div className="flex min-h-screen items-center justify-center p-4">
-      <main className="flex flex-col items-center gap-8 text-center max-w-2xl w-full">
-        <h1 className="text-6xl font-bold tracking-tight">
-          Personal Knowledge Base
-        </h1>
-        <Card className="w-full">
-          <CardHeader>
-            <CardTitle>Welcome back, {user?.name || user?.email}!</CardTitle>
-            <CardDescription>
-              Your personal space to capture and organize knowledge
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="text-left space-y-2">
-              <p className="text-sm text-muted-foreground">
-                <span className="font-medium">Email:</span> {user?.email}
-              </p>
-              {user?.name && (
-                <p className="text-sm text-muted-foreground">
-                  <span className="font-medium">Name:</span> {user.name}
-                </p>
-              )}
-            </div>
+    <div className="min-h-screen p-4 md:p-8">
+      <div className="max-w-4xl mx-auto space-y-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight">My Notes</h1>
+            <p className="text-muted-foreground">
+              Welcome back, {user.name || user.email}
+            </p>
+          </div>
+          <div className="flex gap-2">
+            <Button asChild>
+              <Link href="/notes/new">New Note</Link>
+            </Button>
             <form action={logout}>
-              <Button type="submit" variant="outline" className="w-full">
+              <Button type="submit" variant="outline">
                 Logout
               </Button>
             </form>
-          </CardContent>
-        </Card>
-        <p className="text-muted-foreground">
-          Start creating your notes and building your knowledge base
-        </p>
-      </main>
+          </div>
+        </div>
+
+        {notes.length === 0 ? (
+          <Card>
+            <CardContent className="flex flex-col items-center justify-center py-12">
+              <p className="text-muted-foreground mb-4">
+                No notes yet. Create your first note to get started!
+              </p>
+              <Button asChild>
+                <Link href="/notes/new">Create Note</Link>
+              </Button>
+            </CardContent>
+          </Card>
+        ) : (
+          <div className="grid gap-4 md:grid-cols-2">
+            {notes.map((note) => (
+              <Link href={`/notes/${note.id}`} key={note.id}>
+                <Card className="h-full hover:bg-accent/50 transition-colors cursor-pointer">
+                  <CardHeader>
+                    <CardTitle className="line-clamp-1">{note.title}</CardTitle>
+                    <CardDescription>
+                      {new Date(note.updatedAt).toLocaleDateString("en-US", {
+                        month: "short",
+                        day: "numeric",
+                        year: "numeric",
+                      })}
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm text-muted-foreground line-clamp-3">
+                      {note.content}
+                    </p>
+                  </CardContent>
+                </Card>
+              </Link>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
