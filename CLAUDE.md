@@ -146,12 +146,18 @@ The core feature of the app is a simple note-taking system:
 **Routes**:
 - `/` - Home page displaying all user's notes in a grid
 - `/notes/new` - Create a new note
-- `/notes/[id]` - View a single note
+- `/notes/[id]` - View a single note with edit/delete actions
+- `/notes/[id]/edit` - Edit an existing note
 
 **Server Actions** (`lib/actions/notes.ts`):
 - `createNote(formData)` - Creates a new note
 - `getNotes(userId)` - Fetches all notes for a user
 - `getNote(id, userId)` - Fetches a single note
+- `updateNote(id, formData)` - Updates an existing note
+- `deleteNote(id)` - Deletes a note (with user verification)
+
+**Components**:
+- `DeleteNoteButton` - Client component with confirmation dialog before deletion
 
 **Flow**:
 1. User logs in
@@ -159,3 +165,4 @@ The core feature of the app is a simple note-taking system:
 3. Creates a new note with title and content
 4. Note appears in the list
 5. Can click to view full note
+6. Can edit note (pre-filled form) or delete note (with confirmation)

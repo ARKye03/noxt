@@ -3,6 +3,7 @@ import { validateRequest } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { DeleteNoteButton } from "@/components/delete-note-button";
 import Link from "next/link";
 
 export default async function NotePage({
@@ -30,24 +31,32 @@ export default async function NotePage({
           <Button variant="outline" asChild>
             <Link href="/">← Back to Notes</Link>
           </Button>
-          <p className="text-sm text-muted-foreground">
-            {new Date(note.updatedAt).toLocaleDateString("en-US", {
-              month: "long",
-              day: "numeric",
-              year: "numeric",
-              hour: "2-digit",
-              minute: "2-digit",
-            })}
-          </p>
+          <div className="flex items-center gap-2">
+            <p className="text-sm text-muted-foreground">
+              {new Date(note.updatedAt).toLocaleDateString("en-US", {
+                month: "long",
+                day: "numeric",
+                year: "numeric",
+                hour: "2-digit",
+                minute: "2-digit",
+              })}
+            </p>
+          </div>
         </div>
 
         <Card>
           <CardHeader>
             <CardTitle className="text-3xl">{note.title}</CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="space-y-6">
             <div className="prose prose-gray dark:prose-invert max-w-none">
               <p className="whitespace-pre-wrap">{note.content}</p>
+            </div>
+            <div className="flex gap-2 pt-4 border-t">
+              <Button asChild>
+                <Link href={`/notes/${id}/edit`}>Edit</Link>
+              </Button>
+              <DeleteNoteButton noteId={id} />
             </div>
           </CardContent>
         </Card>
