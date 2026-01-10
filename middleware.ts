@@ -8,6 +8,12 @@ export async function middleware(request: NextRequest) {
   // Public routes that don't require authentication
   const publicRoutes = ["/login", "/signup"];
   const isPublicRoute = publicRoutes.includes(pathname);
+  const isOAuthRoute = pathname.startsWith("/login/google");
+
+  // Allow OAuth routes
+  if (isOAuthRoute) {
+    return NextResponse.next();
+  }
 
   // Get the session cookie
   const sessionCookie = (await cookies()).get("auth_session");

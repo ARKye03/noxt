@@ -11,15 +11,25 @@ datasource db {
 }
 
 model User {
-  id             String    @id @default(cuid())
-  email          String    @unique
+  id             String         @id @default(cuid())
+  email          String         @unique
   name           String?
-  hashedPassword String
+  hashedPassword String?
   sessions       Session[]
+  oauthAccounts  OAuthAccount[]
   notes          Note[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model OAuthAccount {
+  providerId     String
+  providerUserId String
+  userId         String
+  user           User   @relation(references: [id], fields: [userId], onDelete: Cascade)
+
+  @@id([providerId, providerUserId])
 }
 
 model Session {

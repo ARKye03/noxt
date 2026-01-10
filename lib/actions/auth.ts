@@ -64,6 +64,11 @@ export async function login(formData: FormData) {
     redirect("/login?error=Invalid email or password");
   }
 
+  // Check if user has a password (not OAuth-only user)
+  if (!user.hashedPassword) {
+    redirect("/login?error=Please login with Google");
+  }
+
   // Verify password
   const validPassword = await new Argon2id().verify(user.hashedPassword, password);
 
