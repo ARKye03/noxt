@@ -14,7 +14,7 @@ export async function signup(formData: FormData) {
 
   // Basic validation
   if (!email || !password || password.length < 6) {
-    return { error: "Invalid email or password (minimum 6 characters)" };
+    redirect("/signup?error=Invalid email or password (minimum 6 characters)");
   }
 
   // Check if user already exists
@@ -23,7 +23,7 @@ export async function signup(formData: FormData) {
   });
 
   if (existingUser) {
-    return { error: "User with this email already exists" };
+    redirect("/signup?error=User with this email already exists");
   }
 
   // Hash password
@@ -45,7 +45,7 @@ export async function signup(formData: FormData) {
   const sessionCookie = lucia.createSessionCookie(session.id);
   (await cookies()).set(sessionCookie.name, sessionCookie.value, sessionCookie.attributes);
 
-  return redirect("/");
+  redirect("/");
 }
 
 export async function login(formData: FormData) {
@@ -53,7 +53,7 @@ export async function login(formData: FormData) {
   const password = formData.get("password") as string;
 
   if (!email || !password) {
-    return { error: "Invalid email or password" };
+    redirect("/login?error=Invalid email or password");
   }
 
   const user = await db.user.findUnique({
@@ -61,28 +61,28 @@ export async function login(formData: FormData) {
   });
 
   if (!user) {
-    return { error: "Invalid email or password" };
+    redirect("/login?error=Invalid email or password");
   }
 
   // Verify password
   const validPassword = await new Argon2id().verify(user.hashedPassword, password);
 
   if (!validPassword) {
-    return { error: "Invalid email or password" };
+    redirect("/login?error=Invalid email or password");
   }
 
   const session = await lucia.createSession(user.id, {});
   const sessionCookie = lucia.createSessionCookie(session.id);
   (await cookies()).set(sessionCookie.name, sessionCookie.value, sessionCookie.attributes);
 
-  return redirect("/");
+  redirect("/");
 }
 
 export async function logout() {
   const { session } = await validateRequest();
 
   if (!session) {
-    return { error: "Unauthorized" };
+    redirect("/login");
   }
 
   await lucia.invalidateSession(session.id);
@@ -90,5 +90,5 @@ export async function logout() {
   const sessionCookie = lucia.createBlankSessionCookie();
   (await cookies()).set(sessionCookie.name, sessionCookie.value, sessionCookie.attributes);
 
-  return redirect("/login");
+  redirect("/login");
 }

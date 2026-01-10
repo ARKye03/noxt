@@ -25,8 +25,12 @@ bunx --bun prisma studio          # Open Prisma Studio
 
 **Important**: Always use `bunx --bun` for Prisma commands to use Bun's runtime.
 
-Note: Prisma client generates to `lib/generated/prisma` (not the default location).
-Database file is located at `prisma/dev.db` and is gitignored.
+**Prisma 7 Configuration**:
+- This project uses Prisma 7 which requires different setup than Prisma 5
+- Prisma client generates to `lib/generated/prisma/client` (import from `/client`)
+- Database file is located at `prisma/dev.db` and is gitignored
+- Connection uses `@prisma/adapter-libsql` adapter (required in Prisma 7)
+- Database configuration is in `prisma.config.ts` and `lib/db.ts`
 
 ## Architecture
 
