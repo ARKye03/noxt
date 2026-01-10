@@ -10,20 +10,23 @@ Next.js 16 application using the App Router with TypeScript, React 19, Bun, Tail
 
 ### Development
 ```bash
-bun build        # Build for production
 bun dev          # Start development server at http://localhost:3000
+bun build        # Build for production
 bun start        # Start production server
 bun lint         # Run ESLint (uses flat config format)
 ```
 
 ### Database (Prisma)
 ```bash
-bunx prisma generate  # Generate Prisma Client to lib/generated/prisma
-bunx prisma migrate dev  # Run migrations
-bunx prisma studio    # Open Prisma Studio
+bunx --bun prisma generate        # Generate Prisma Client to lib/generated/prisma
+bunx --bun prisma migrate dev     # Run migrations
+bunx --bun prisma studio          # Open Prisma Studio
 ```
 
+**Important**: Always use `bunx --bun` for Prisma commands to use Bun's runtime.
+
 Note: Prisma client generates to `lib/generated/prisma` (not the default location).
+Database file is located at `prisma/dev.db` and is gitignored.
 
 ## Architecture
 
@@ -74,6 +77,9 @@ Note: Prisma client generates to `lib/generated/prisma` (not the default locatio
 
 ## Development Notes
 
+### Verify errors and linting
+Always run `bunx --bun tsc --noEmit` to verify there are no type errors before committing, and `bun lint` to verify there are no linting errors before committing.
+
 ### Adding shadcn/ui Components
 Components are in `components/ui/` and use the `cn()` utility from `lib/utils.ts`. They follow the shadcn/ui pattern with CVA variants and Radix UI primitives.
 
@@ -82,3 +88,18 @@ The project uses Geist Sans and Geist Mono from Google Fonts, loaded via `next/f
 
 ### Dark Mode
 Dark mode uses a class-based approach with the custom `.dark` class. The variant is defined in globals.css with `@custom-variant dark (&:is(.dark *))`. The `ThemeProvider` component (in `components/theme-provider.tsx`) automatically detects the system color scheme preference and applies the dark class to the document element.
+
+### Authentication
+The app uses Lucia Auth with Prisma adapter for session-based authentication:
+- `lib/auth.ts` - Lucia configuration and `validateRequest()` helper
+- `lib/db.ts` - Prisma client singleton
+- `lib/actions/auth.ts` - Server actions for signup, login, and logout
+- `middleware.ts` - Route protection (redirects unauthenticated users to /login)
+- Password hashing uses Argon2id via the `oslo` library
+
+**Database Models**:
+- `User` - email, name, hashedPassword, sessions[], notes[]
+- `Session` - id, userId, expiresAt (managed by Lucia)
+- `Note` - id, title, content, userId
+
+**Protected Routes**: All routes except `/login` and `/signup` require authentication.
