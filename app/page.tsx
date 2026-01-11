@@ -4,6 +4,7 @@ import { getNotes } from "@/lib/actions/notes";
 import { NotesList } from "@/components/notes-list";
 import { HomeShortcuts } from "@/components/home-shortcuts";
 import { LogoutButton } from "@/components/logout-button";
+import { ThemeToggle } from "@/components/theme-toggle";
 import Link from "next/link";
 
 export default async function Home() {
@@ -32,6 +33,7 @@ export default async function Home() {
                 <Link href="/notes/new">New Note</Link>
               </Button>
               <LogoutButton />
+              <ThemeToggle />
             </div>
             <p className="text-xs text-muted-foreground">Press N: New note</p>
           </div>
