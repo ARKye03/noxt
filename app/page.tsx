@@ -1,9 +1,9 @@
 import { Button } from "@/components/ui/button";
 import { validateRequest } from "@/lib/auth";
-import { logout } from "@/lib/actions/auth";
 import { getNotes } from "@/lib/actions/notes";
 import { NotesList } from "@/components/notes-list";
 import { HomeShortcuts } from "@/components/home-shortcuts";
+import { LogoutButton } from "@/components/logout-button";
 import Link from "next/link";
 
 export default async function Home() {
@@ -31,11 +31,7 @@ export default async function Home() {
               <Button asChild>
                 <Link href="/notes/new">New Note</Link>
               </Button>
-              <form action={logout}>
-                <Button type="submit" variant="outline">
-                  Logout
-                </Button>
-              </form>
+              <LogoutButton />
             </div>
             <p className="text-xs text-muted-foreground">Press N: New note</p>
           </div>
