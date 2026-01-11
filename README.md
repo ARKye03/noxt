@@ -15,6 +15,7 @@ Awesome note-taking app built with Next.js.
 - Tailwind 4
 - Prisma with SQLite
 - Bun
+- Vitest
 
 ### Features
 
@@ -23,7 +24,6 @@ Awesome note-taking app built with Next.js.
 - Keyboard shortcuts
 - Responsive design
 - Note CRUD operations
-- Note sorting
 - Note search (Fuzzy Search with Fuse.js)
 
 ### Screenshots
@@ -82,7 +82,7 @@ bunx --bun prisma migrate dev
 bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open <http://localhost:3000> with your browser to see the result.
 
 ### Story
 
