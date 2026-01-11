@@ -15,6 +15,15 @@ vi.mock("@/lib/db", () => ({
       update: vi.fn(),
       delete: vi.fn(),
     },
+    tag: {
+      findFirst: vi.fn(),
+      create: vi.fn(),
+      findMany: vi.fn(),
+    },
+    noteTag: {
+      create: vi.fn(),
+      deleteMany: vi.fn(),
+    },
   },
 }));
 
@@ -36,6 +45,15 @@ const mockDb = db as typeof db & {
     findFirst: ReturnType<typeof vi.fn>;
     update: ReturnType<typeof vi.fn>;
     delete: ReturnType<typeof vi.fn>;
+  };
+  tag: {
+    findFirst: ReturnType<typeof vi.fn>;
+    create: ReturnType<typeof vi.fn>;
+    findMany: ReturnType<typeof vi.fn>;
+  };
+  noteTag: {
+    create: ReturnType<typeof vi.fn>;
+    deleteMany: ReturnType<typeof vi.fn>;
   };
 };
 const mockRedirect = redirect as any;
@@ -135,6 +153,13 @@ describe("notes actions", () => {
       expect(result).toEqual(mockNotes);
       expect(mockDb.note.findMany).toHaveBeenCalledWith({
         where: { userId: "user1" },
+        include: {
+          noteTags: {
+            include: {
+              tag: true,
+            },
+          },
+        },
         orderBy: { updatedAt: "desc" },
       });
     });
@@ -159,6 +184,13 @@ describe("notes actions", () => {
         where: {
           id: "note1",
           userId: "user1",
+        },
+        include: {
+          noteTags: {
+            include: {
+              tag: true,
+            },
+          },
         },
       });
     });
@@ -224,10 +256,12 @@ describe("notes actions", () => {
         createdAt: new Date(),
         updatedAt: new Date(),
       });
+      mockDb.noteTag.deleteMany.mockResolvedValue({ count: 0 });
 
       const formData = new FormData();
       formData.set("title", "Updated");
       formData.set("content", "Updated content");
+      formData.set("tags", "[]");
 
       await expect(updateNote("note1", formData)).rejects.toThrow(
         "REDIRECT:/notes/note1"

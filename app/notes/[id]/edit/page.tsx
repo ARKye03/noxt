@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { NoteEditor } from "@/components/note-editor";
 import { Button } from "@/components/ui/button";
+import { EditNoteForm } from "@/components/edit-note-form";
 import Link from "next/link";
 
 export default async function EditNotePage({
@@ -41,37 +42,13 @@ export default async function EditNotePage({
           </Button>
         </div>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Update your note</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <form action={updateNote.bind(null, id)} className="space-y-4">
-              {error && (
-                <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">
-                  {error}
-                </div>
-              )}
-              <div className="space-y-2">
-                <Label htmlFor="title">Title</Label>
-                <Input
-                  id="title"
-                  name="title"
-                  placeholder="Enter note title"
-                  defaultValue={note.title}
-                  required
-                  autoFocus
-                />
-              </div>
-              <NoteEditor initialContent={note.content} noteId={id} />
-              <div className="flex gap-2">
-                <Button type="submit" className="w-full">
-                  Save Changes
-                </Button>
-              </div>
-            </form>
-          </CardContent>
-        </Card>
+        <EditNoteForm
+          noteId={id}
+          initialTitle={note.title}
+          initialContent={note.content}
+          initialTags={note.noteTags.map((nt) => nt.tag.name)}
+          error={error}
+        />
       </div>
     </div>
   );

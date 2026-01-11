@@ -18,6 +18,7 @@ model User {
   sessions       Session[]
   oauthAccounts  OAuthAccount[]
   notes          Note[]
+  tags           Tag[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -40,14 +41,42 @@ model Session {
 }
 
 model Note {
-  id        String   @id @default(cuid())
+  id        String     @id @default(cuid())
   title     String
   content   String
   userId    String
-  user      User     @relation(references: [id], fields: [userId], onDelete: Cascade)
+  user      User       @relation(references: [id], fields: [userId], onDelete: Cascade)
+  noteTags  NoteTag[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@index([userId])
+}
+
+model Tag {
+  id       String    @id @default(cuid())
+  name     String
+  userId   String
+  user     User      @relation(references: [id], fields: [userId], onDelete: Cascade)
+  noteTags NoteTag[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([name, userId])
+  @@index([userId])
+}
+
+model NoteTag {
+  noteId String
+  tagId  String
+  note   Note   @relation(references: [id], fields: [noteId], onDelete: Cascade)
+  tag    Tag    @relation(references: [id], fields: [tagId], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@id([noteId, tagId])
+  @@index([noteId])
+  @@index([tagId])
 }

@@ -15,11 +15,13 @@ export function NoteEditor({
   name = "content",
   noteId,
   onNoteIdChange,
+  tags,
 }: {
   initialContent?: string;
   name?: string;
   noteId?: string;
   onNoteIdChange?: (id: string) => void;
+  tags?: string[];
 }) {
   const [content, setContent] = useState(initialContent || "");
   const [viewMode, setViewMode] = useState<ViewMode>("split");
@@ -55,6 +57,7 @@ export function NoteEditor({
         id: currentNoteIdRef.current,
         title,
         content,
+        tags,
       });
 
       if (result.success) {

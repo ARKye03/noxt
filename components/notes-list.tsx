@@ -5,6 +5,7 @@ import Fuse from "fuse.js";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 
 interface Note {
@@ -13,11 +14,27 @@ interface Note {
   content: string;
   createdAt: Date;
   updatedAt: Date;
+  noteTags: {
+    tag: {
+      id: string;
+      name: string;
+    };
+  }[];
 }
 
 export function NotesList({ notes }: { notes: Note[] }) {
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedTag, setSelectedTag] = useState<string | null>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
+
+  // Get all unique tags from all notes
+  const allTags = useMemo(() => {
+    const tagSet = new Set<string>();
+    notes.forEach((note) => {
+      note.noteTags.forEach((nt) => tagSet.add(nt.tag.name));
+    });
+    return Array.from(tagSet).sort();
+  }, [notes]);
 
   // Configure Fuse.js for fuzzy search
   const fuse = useMemo(
@@ -30,15 +47,30 @@ export function NotesList({ notes }: { notes: Note[] }) {
     [notes]
   );
 
-  // Filter notes based on search query
+  // Filter notes based on search query and selected tag
   const filteredNotes = useMemo(() => {
-    if (!searchQuery.trim()) {
-      return notes;
+    let filtered = notes;
+
+    // Filter by tag first
+    if (selectedTag) {
+      filtered = filtered.filter((note) =>
+        note.noteTags.some((nt) => nt.tag.name === selectedTag)
+      );
     }
 
-    const results = fuse.search(searchQuery);
-    return results.map((result) => result.item);
-  }, [searchQuery, fuse, notes]);
+    // Then filter by search query
+    if (searchQuery.trim()) {
+      const fuse = new Fuse(filtered, {
+        keys: ["title", "content"],
+        threshold: 0.3,
+        includeScore: true,
+      });
+      const results = fuse.search(searchQuery);
+      return results.map((result) => result.item);
+    }
+
+    return filtered;
+  }, [searchQuery, selectedTag, notes]);
 
   // Keyboard shortcut to focus search (S key)
   useEffect(() => {
@@ -87,15 +119,34 @@ export function NotesList({ notes }: { notes: Note[] }) {
           onChange={(e) => setSearchQuery(e.target.value)}
           className="flex-1"
         />
-        {searchQuery && (
+        {(searchQuery || selectedTag) && (
           <Button
             variant="outline"
-            onClick={() => setSearchQuery("")}
+            onClick={() => {
+              setSearchQuery("");
+              setSelectedTag(null);
+            }}
           >
-            Clear
+            Clear All
           </Button>
         )}
       </div>
+
+      {allTags.length > 0 && (
+        <div className="flex flex-wrap gap-2">
+          <span className="text-sm text-muted-foreground self-center">Filter by tag:</span>
+          {allTags.map((tag) => (
+            <Badge
+              key={tag}
+              variant={selectedTag === tag ? "default" : "secondary"}
+              className="cursor-pointer hover:bg-primary/80"
+              onClick={() => setSelectedTag(selectedTag === tag ? null : tag)}
+            >
+              {tag}
+            </Badge>
+          ))}
+        </div>
+      )}
 
       {filteredNotes.length === 0 ? (
         <Card>
@@ -110,9 +161,10 @@ export function NotesList({ notes }: { notes: Note[] }) {
         </Card>
       ) : (
         <>
-          {searchQuery && (
+          {(searchQuery || selectedTag) && (
             <p className="text-sm text-muted-foreground">
               Found {filteredNotes.length} {filteredNotes.length === 1 ? "note" : "notes"}
+              {selectedTag && ` with tag "${selectedTag}"`}
             </p>
           )}
           <div className="grid gap-4 md:grid-cols-2">
@@ -121,12 +173,23 @@ export function NotesList({ notes }: { notes: Note[] }) {
                 <Card className="h-full hover:bg-accent/50 transition-colors cursor-pointer">
                   <CardHeader>
                     <CardTitle className="line-clamp-1">{note.title}</CardTitle>
-                    <CardDescription>
-                      {new Date(note.updatedAt).toLocaleDateString("en-US", {
-                        month: "short",
-                        day: "numeric",
-                        year: "numeric",
-                      })}
+                    <CardDescription className="flex items-center gap-2 flex-wrap">
+                      <span>
+                        {new Date(note.updatedAt).toLocaleDateString("en-US", {
+                          month: "short",
+                          day: "numeric",
+                          year: "numeric",
+                        })}
+                      </span>
+                      {note.noteTags.length > 0 && (
+                        <span className="flex gap-1 flex-wrap">
+                          {note.noteTags.map((nt) => (
+                            <Badge key={nt.tag.id} variant="outline" className="text-xs">
+                              {nt.tag.name}
+                            </Badge>
+                          ))}
+                        </span>
+                      )}
                     </CardDescription>
                   </CardHeader>
                   <CardContent>

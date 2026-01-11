@@ -3,6 +3,7 @@ import { validateRequest } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { NoteViewActions } from "@/components/note-view-actions";
 import { MarkdownPreview } from "@/components/markdown-preview";
 import Link from "next/link";
@@ -48,6 +49,15 @@ export default async function NotePage({
         <Card>
           <CardHeader>
             <CardTitle className="text-3xl">{note.title}</CardTitle>
+            {note.noteTags.length > 0 && (
+              <div className="flex gap-2 flex-wrap mt-2">
+                {note.noteTags.map((nt) => (
+                  <Badge key={nt.tag.id} variant="secondary">
+                    {nt.tag.name}
+                  </Badge>
+                ))}
+              </div>
+            )}
           </CardHeader>
           <CardContent className="space-y-6">
             <MarkdownPreview content={note.content} />
