@@ -28,7 +28,7 @@ import { validateRequest } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { redirect } from "next/navigation";
 
-const mockValidateRequest = validateRequest as ReturnType<typeof vi.fn>;
+const mockValidateRequest = validateRequest as any;
 const mockDb = db as typeof db & {
   note: {
     create: ReturnType<typeof vi.fn>;
@@ -38,7 +38,7 @@ const mockDb = db as typeof db & {
     delete: ReturnType<typeof vi.fn>;
   };
 };
-const mockRedirect = redirect as ReturnType<typeof vi.fn>;
+const mockRedirect = redirect as any;
 
 describe("notes actions", () => {
   beforeEach(() => {
