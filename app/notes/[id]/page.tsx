@@ -3,7 +3,7 @@ import { validateRequest } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { DeleteNoteButton } from "@/components/delete-note-button";
+import { NoteViewActions } from "@/components/note-view-actions";
 import { MarkdownPreview } from "@/components/markdown-preview";
 import Link from "next/link";
 
@@ -51,12 +51,7 @@ export default async function NotePage({
           </CardHeader>
           <CardContent className="space-y-6">
             <MarkdownPreview content={note.content} />
-            <div className="flex gap-2 pt-4 border-t">
-              <Button asChild>
-                <Link href={`/notes/${id}/edit`}>Edit</Link>
-              </Button>
-              <DeleteNoteButton noteId={id} />
-            </div>
+            <NoteViewActions noteId={id} />
           </CardContent>
         </Card>
       </div>

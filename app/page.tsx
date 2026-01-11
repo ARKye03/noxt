@@ -3,6 +3,7 @@ import { validateRequest } from "@/lib/auth";
 import { logout } from "@/lib/actions/auth";
 import { getNotes } from "@/lib/actions/notes";
 import { NotesList } from "@/components/notes-list";
+import { HomeShortcuts } from "@/components/home-shortcuts";
 import Link from "next/link";
 
 export default async function Home() {
@@ -16,6 +17,7 @@ export default async function Home() {
 
   return (
     <div className="min-h-screen p-4 md:p-8">
+      <HomeShortcuts />
       <div className="max-w-4xl mx-auto space-y-6">
         <div className="flex items-center justify-between">
           <div>
@@ -24,15 +26,18 @@ export default async function Home() {
               Welcome back, {user.name || user.email}
             </p>
           </div>
-          <div className="flex gap-2">
-            <Button asChild>
-              <Link href="/notes/new">New Note</Link>
-            </Button>
-            <form action={logout}>
-              <Button type="submit" variant="outline">
-                Logout
+          <div className="flex flex-col items-end gap-2">
+            <div className="flex gap-2">
+              <Button asChild>
+                <Link href="/notes/new">New Note</Link>
               </Button>
-            </form>
+              <form action={logout}>
+                <Button type="submit" variant="outline">
+                  Logout
+                </Button>
+              </form>
+            </div>
+            <p className="text-xs text-muted-foreground">Press N: New note</p>
           </div>
         </div>
 

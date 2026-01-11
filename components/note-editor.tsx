@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { MarkdownPreview } from "@/components/markdown-preview";
@@ -18,10 +18,46 @@ export function NoteEditor({
   const [content, setContent] = useState(initialContent || "");
   const [viewMode, setViewMode] = useState<ViewMode>("split");
 
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Check for Ctrl/Cmd modifier
+      const isMod = e.ctrlKey || e.metaKey;
+
+      // View mode shortcuts: Ctrl/Cmd+1/2/3
+      if (isMod && e.key === "1") {
+        e.preventDefault();
+        setViewMode("editor");
+      } else if (isMod && e.key === "2") {
+        e.preventDefault();
+        setViewMode("split");
+      } else if (isMod && e.key === "3") {
+        e.preventDefault();
+        setViewMode("preview");
+      }
+      // Save shortcut: Ctrl/Cmd+S
+      else if (isMod && e.key === "s") {
+        e.preventDefault();
+        // Find the form that contains this editor and submit it
+        const form = document.querySelector("form");
+        if (form) {
+          form.requestSubmit();
+        }
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
+
   return (
     <div className="space-y-2">
       <div className="flex items-center justify-between">
-        <Label htmlFor={name}>Content</Label>
+        <div className="flex items-center gap-3">
+          <Label htmlFor={name}>Content</Label>
+          <span className="hidden md:inline text-xs text-muted-foreground">
+            ⌘+1/2/3: Views • ⌘+S: Save
+          </span>
+        </div>
         <div className="flex gap-1 rounded-md border border-border p-1">
           <button
             type="button"
@@ -30,6 +66,7 @@ export function NoteEditor({
                 ? "bg-primary text-primary-foreground"
                 : "text-muted-foreground hover:text-foreground"
               }`}
+            title="Editor only (⌘+1)"
           >
             Editor
           </button>
@@ -40,6 +77,7 @@ export function NoteEditor({
                 ? "bg-primary text-primary-foreground"
                 : "text-muted-foreground hover:text-foreground"
               }`}
+            title="Split view (⌘+2)"
           >
             Split
           </button>
@@ -50,6 +88,7 @@ export function NoteEditor({
                 ? "bg-primary text-primary-foreground"
                 : "text-muted-foreground hover:text-foreground"
               }`}
+            title="Preview only (⌘+3)"
           >
             Preview
           </button>

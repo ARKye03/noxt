@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import "highlight.js/styles/github-dark.css";
 import { ThemeProvider } from "@/components/theme-provider";
+import { KeyboardShortcuts } from "@/components/keyboard-shortcuts";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -29,7 +30,10 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <ThemeProvider>{children}</ThemeProvider>
+        <ThemeProvider>
+          <KeyboardShortcuts />
+          {children}
+        </ThemeProvider>
       </body>
     </html>
   );
