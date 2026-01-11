@@ -15,6 +15,8 @@ bun dev          # Start development server at http://localhost:3000
 bun build        # Build for production
 bun start        # Start production server
 bun lint         # Run ESLint (uses flat config format)
+bun test         # Run tests in watch mode
+bun test:run     # Run tests once
 ```
 
 ### Database (Prisma)
@@ -88,11 +90,25 @@ bunx --bun prisma studio          # Open Prisma Studio
 - `tailwindcss` 4 - Styling (v4 uses different config approach)
 - `@tailwindcss/typography` - Typography plugin for prose styling in markdown preview
 - `@radix-ui/react-slot` - Used by shadcn/ui components for polymorphic behavior
+- `@radix-ui/react-dialog` - Dialog component for modals
 - `class-variance-authority` - Component variant management
 - `tw-animate-css` - Additional Tailwind animations
 - `react-markdown` - Markdown rendering with `remark-gfm` and `rehype-highlight` plugins
+- `next-themes` - Theme management with system preference detection
+- `sonner` - Toast notifications
+- `vitest` - Testing framework
+- `fuse.js` - Fuzzy search functionality
 
 ## Development Notes
+
+### Testing
+
+The project uses Vitest for testing:
+
+- Test files: `**/__tests__/*.test.ts`
+- Configuration: `vitest.config.ts`
+- Run tests: `bun test` (watch mode) or `bun test:run` (single run)
+- All server actions have test coverage
 
 ### Verify errors after a long set of changes
 
@@ -112,7 +128,13 @@ The project uses Geist Sans and Geist Mono from Google Fonts, loaded via `next/f
 
 ### Dark Mode
 
-Dark mode uses a class-based approach with the custom `.dark` class. The variant is defined in globals.css with `@custom-variant dark (&:is(.dark *))`. The `ThemeProvider` component (in `components/theme-provider.tsx`) automatically detects the system color scheme preference and applies the dark class to the document element.
+Dark mode uses a class-based approach with the custom `.dark` class. The variant is defined in globals.css with `@custom-variant dark (&:is(.dark *))`. The `ThemeProvider` component (in `components/theme-provider.tsx`) uses `next-themes` for theme management with system preference detection and manual toggling.
+
+**Theme Toggle**:
+- Theme toggle button available on home page
+- Shows Sun icon in dark mode, Moon icon in light mode
+- Supports system, light, and dark themes
+- Preference persisted in localStorage
 
 ### Authentication
 
@@ -135,10 +157,12 @@ The app uses Lucia Auth with Prisma adapter for session-based authentication:
 
 **Database Models**:
 
-- `User` - email, name, hashedPassword (optional), sessions[], oauthAccounts[], notes[]
+- `User` - email, name, hashedPassword (optional), sessions[], oauthAccounts[], notes[], tags[]
 - `Session` - id, userId, expiresAt (managed by Lucia)
 - `OAuthAccount` - providerId, providerUserId, userId (links OAuth accounts to users)
-- `Note` - id, title, content, userId
+- `Note` - id, title, content, userId, noteTags[]
+- `Tag` - id, name, userId, noteTags[] (user-scoped, unique per user)
+- `NoteTag` - noteId, tagId (junction table for many-to-many relationship)
 
 **Protected Routes**: All routes except `/login`, `/signup`, and `/login/google/*` require authentication.
 
@@ -153,25 +177,35 @@ The core feature of the app is a simple note-taking system:
 - `/notes/[id]/edit` - Edit an existing note
 
 **Server Actions** (`lib/actions/notes.ts`):
-- `createNote(formData)` - Creates a new note
-- `getNotes(userId)` - Fetches all notes for a user
-- `getNote(id, userId)` - Fetches a single note
-- `updateNote(id, formData)` - Updates an existing note
+- `createNote(formData)` - Creates a new note with tags
+- `getNotes(userId)` - Fetches all notes for a user with tags
+- `getNote(id, userId)` - Fetches a single note with tags
+- `updateNote(id, formData)` - Updates an existing note and tags
 - `deleteNote(id)` - Deletes a note (with user verification)
+- `autosaveNote(data)` - Autosaves note with title, content, and tags
+- `getUserTags(userId)` - Fetches all tags for a user
 
 **Components**:
 - `DeleteNoteButton` - Client component with confirmation dialog before deletion
-- `NotesList` - Client component with fuzzy search using fuse.js
+- `NotesList` - Client component with fuzzy search and tag filtering using fuse.js
 - `MarkdownPreview` - Client component for rendering markdown with syntax highlighting
-- `NoteEditor` - Client component with live markdown preview
+- `NoteEditor` - Client component with live markdown preview and autosave
+- `TagInput` - Client component for adding/removing tags
+- `NewNoteForm` - Client component for creating notes with tags
+- `EditNoteForm` - Client component for editing notes with tags
+- `ThemeToggle` - Client component for toggling theme
+- `KeyboardShortcutsHelp` - Modal component showing all keyboard shortcuts
 
-**Search Functionality**:
+**Search and Filtering**:
 - Fuzzy search powered by fuse.js
 - Searches both note titles and content
 - Real-time filtering as you type
-- Shows result count
-- "Clear" button to reset search
+- Tag-based filtering (click tags to filter)
+- Combine search query with tag filters
+- Shows result count with active filters
+- "Clear All" button to reset search and tag filters
 - Empty state when no results found
+- Keyboard shortcut: Press `S` to focus search input
 
 **Markdown Support**:
 - Full GitHub Flavored Markdown (GFM) support via `remark-gfm`
@@ -186,9 +220,12 @@ The core feature of the app is a simple note-taking system:
 - Uses `github-dark` theme for code highlighting
 
 **Keyboard Shortcuts**:
+- **Global**:
+  - `?` - Show keyboard shortcuts help modal
+  - `⌘+H` - Go to home
 - **Home Page (My Notes)**:
   - `N` - Create new note (when not typing)
-  - `⌘+H` - Go to home
+  - `S` - Focus search input
 - **Note Editor**:
   - `⌘+1` - Editor only view
   - `⌘+2` - Split view
@@ -198,12 +235,45 @@ The core feature of the app is a simple note-taking system:
   - `⌘+E` - Edit note
   - `⌘+⌫` - Delete note (with confirmation)
   - `⌘+H` - Go to home
+- **Tag Input**:
+  - `Enter` or `,` - Add tag
+  - `Backspace` (when empty) - Remove last tag
+
+**Autosave**:
+- Automatic saving after 750ms of inactivity
+- Debounced for optimal performance
+- Works for both title and content changes
+- Toast notifications:
+  - "Saving note..." with loading spinner
+  - "Note saved" on success
+  - Error messages on failure
+- Creates new notes on first autosave
+- No data loss while editing
+
+**Tagging System**:
+- Add multiple tags to notes
+- Tags are user-scoped (not shared between users)
+- Auto-converted to lowercase
+- Duplicate prevention
+- Tag input with keyboard shortcuts (Enter/comma to add, Backspace to remove)
+- Tag filtering on home page (click to filter)
+- Tags displayed as badges on note cards and detail pages
+- Tags autosaved along with note content
+
+**Toast Notifications**:
+- Uses `sonner` component
+- Displays autosave status
+- Clean, themed notifications that match dark/light mode
+- Custom icons for different states (loading, success, error)
 
 **Flow**:
 1. User logs in
 2. Sees list of their notes (or empty state)
-3. Can search notes using the search bar
-4. Creates a new note with title and content
-5. Note appears in the list
-6. Can click to view full note
-7. Can edit note (pre-filled form) or delete note (with confirmation)
+3. Can search notes using the search bar (press S to focus)
+4. Can filter notes by clicking tags
+5. Creates a new note with title, content, and tags
+6. Note autosaves as you type (750ms debounce)
+7. Note appears in the list with tags
+8. Can click to view full note with tags
+9. Can edit note (pre-filled form with tags) or delete note (with confirmation)
+10. Can toggle between light and dark themes
