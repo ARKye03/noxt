@@ -6,7 +6,7 @@ import rehypeHighlight from "rehype-highlight";
 
 export function MarkdownPreview({ content }: { content: string }) {
   return (
-    <div className="prose prose-gray dark:prose-invert max-w-none prose-headings:scroll-mt-20 prose-pre:bg-muted prose-pre:border prose-pre:border-border">
+    <div className="prose prose-neutral dark:prose-invert max-w-none">
       <ReactMarkdown
         remarkPlugins={[remarkGfm]}
         rehypePlugins={[rehypeHighlight]}

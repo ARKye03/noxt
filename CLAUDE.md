@@ -52,6 +52,7 @@ bunx --bun prisma studio          # Open Prisma Studio
 ### Styling System
 
 - Uses Tailwind CSS v4 with `@theme inline` configuration in `globals.css`
+- Includes `@tailwindcss/typography` plugin for markdown prose styling
 - Custom dark mode variant: `@custom-variant dark (&:is(.dark *))`
 - Theme uses OKLCH color space for improved color perception
 - CSS variables define a comprehensive design system (colors, shadows, spacing, radii)
@@ -85,9 +86,11 @@ bunx --bun prisma studio          # Open Prisma Studio
 - `next` 16.1.1 - Framework
 - `react` 19.2.3 - UI library (latest version)
 - `tailwindcss` 4 - Styling (v4 uses different config approach)
+- `@tailwindcss/typography` - Typography plugin for prose styling in markdown preview
 - `@radix-ui/react-slot` - Used by shadcn/ui components for polymorphic behavior
 - `class-variance-authority` - Component variant management
 - `tw-animate-css` - Additional Tailwind animations
+- `react-markdown` - Markdown rendering with `remark-gfm` and `rehype-highlight` plugins
 
 ## Development Notes
 
@@ -173,11 +176,28 @@ The core feature of the app is a simple note-taking system:
 **Markdown Support**:
 - Full GitHub Flavored Markdown (GFM) support via `remark-gfm`
 - Syntax highlighting for code blocks via `rehype-highlight` and `highlight.js`
-- Live preview while editing (side-by-side on desktop)
-- Toggle preview visibility
+- Styled with `@tailwindcss/typography` prose classes (prose-neutral theme)
+- Live preview while editing with three view modes:
+  - Editor only (⌘+1)
+  - Split view - editor and preview side-by-side (⌘+2, default)
+  - Preview only (⌘+3)
 - Supports: headings, lists, tables, task lists, code blocks, links, images, etc.
 - External links open in new tab
 - Uses `github-dark` theme for code highlighting
+
+**Keyboard Shortcuts**:
+- **Home Page (My Notes)**:
+  - `N` - Create new note (when not typing)
+  - `⌘+H` - Go to home
+- **Note Editor**:
+  - `⌘+1` - Editor only view
+  - `⌘+2` - Split view
+  - `⌘+3` - Preview only view
+  - `⌘+S` - Save changes
+- **Note View**:
+  - `⌘+E` - Edit note
+  - `⌘+⌫` - Delete note (with confirmation)
+  - `⌘+H` - Go to home
 
 **Flow**:
 1. User logs in
