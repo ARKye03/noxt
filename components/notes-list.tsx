@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef, useEffect } from "react";
 import Fuse from "fuse.js";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -17,6 +17,7 @@ interface Note {
 
 export function NotesList({ notes }: { notes: Note[] }) {
   const [searchQuery, setSearchQuery] = useState("");
+  const searchInputRef = useRef<HTMLInputElement>(null);
 
   // Configure Fuse.js for fuzzy search
   const fuse = useMemo(
@@ -39,6 +40,27 @@ export function NotesList({ notes }: { notes: Note[] }) {
     return results.map((result) => result.item);
   }, [searchQuery, fuse, notes]);
 
+  // Keyboard shortcut to focus search (S key)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Check if S is pressed and not in an input/textarea
+      if (
+        e.key === "s" &&
+        !e.ctrlKey &&
+        !e.metaKey &&
+        !e.altKey &&
+        document.activeElement?.tagName !== "INPUT" &&
+        document.activeElement?.tagName !== "TEXTAREA"
+      ) {
+        e.preventDefault();
+        searchInputRef.current?.focus();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
+
   if (notes.length === 0) {
     return (
       <Card>
@@ -58,8 +80,9 @@ export function NotesList({ notes }: { notes: Note[] }) {
     <div className="space-y-4">
       <div className="flex gap-2">
         <Input
+          ref={searchInputRef}
           type="search"
-          placeholder="Search notes..."
+          placeholder="Search notes... (Press S to focus)"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           className="flex-1"
