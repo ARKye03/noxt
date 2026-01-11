@@ -26,6 +26,12 @@ Awesome note-taking app built with Next.js.
 - Note sorting
 - Note search (Fuzzy Search with Fuse.js)
 
+### Screenshots
+
+![myNotes](./.github/images/myNotes.webp)
+![beautifulNote](./.github/images/beautifulNote.webp)
+![rustyNotes](./.github/images/rustyNotes.webp)
+
 ## Getting Started
 
 Clone the repository:
