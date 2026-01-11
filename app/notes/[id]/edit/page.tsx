@@ -63,7 +63,7 @@ export default async function EditNotePage({
                   autoFocus
                 />
               </div>
-              <NoteEditor initialContent={note.content} />
+              <NoteEditor initialContent={note.content} noteId={id} />
               <div className="flex gap-2">
                 <Button type="submit" className="w-full">
                   Save Changes

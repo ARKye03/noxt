@@ -1,22 +1,128 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { MarkdownPreview } from "@/components/markdown-preview";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { autosaveNote } from "@/lib/actions/notes";
+import { toast } from "sonner";
 
 type ViewMode = "editor" | "split" | "preview";
 
 export function NoteEditor({
   initialContent,
   name = "content",
+  noteId,
+  onNoteIdChange,
 }: {
   initialContent?: string;
   name?: string;
+  noteId?: string;
+  onNoteIdChange?: (id: string) => void;
 }) {
   const [content, setContent] = useState(initialContent || "");
   const [viewMode, setViewMode] = useState<ViewMode>("split");
+  const [isSaving, setIsSaving] = useState(false);
+  const autosaveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const toastIdRef = useRef<string | number | undefined>(undefined);
+  const currentNoteIdRef = useRef<string | undefined>(noteId);
+
+  // Update the ref when noteId prop changes
+  useEffect(() => {
+    currentNoteIdRef.current = noteId;
+  }, [noteId]);
+
+  // Autosave function
+  const performAutosave = async () => {
+    const titleInput = document.querySelector('input[name="title"]') as HTMLInputElement;
+    const title = titleInput?.value || "";
+
+    if (!title.trim() || !content.trim()) {
+      return;
+    }
+
+    setIsSaving(true);
+
+    // Show saving toast
+    if (toastIdRef.current) {
+      toast.dismiss(toastIdRef.current);
+    }
+    toastIdRef.current = toast.loading("Saving note...");
+
+    try {
+      const result = await autosaveNote({
+        id: currentNoteIdRef.current,
+        title,
+        content,
+      });
+
+      if (result.success) {
+        // If this was a new note, update the noteId
+        if (!currentNoteIdRef.current && result.id) {
+          currentNoteIdRef.current = result.id;
+          onNoteIdChange?.(result.id);
+        }
+
+        // Show success toast
+        toast.success("Note saved", { id: toastIdRef.current });
+        toastIdRef.current = undefined;
+      } else {
+        toast.error(result.error || "Failed to save note", { id: toastIdRef.current });
+        toastIdRef.current = undefined;
+      }
+    } catch (error) {
+      toast.error("Failed to save note", { id: toastIdRef.current });
+      toastIdRef.current = undefined;
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  // Debounced autosave effect for content changes
+  useEffect(() => {
+    // Clear existing timeout
+    if (autosaveTimeoutRef.current) {
+      clearTimeout(autosaveTimeoutRef.current);
+    }
+
+    // Set new timeout for autosave (750ms)
+    autosaveTimeoutRef.current = setTimeout(() => {
+      performAutosave();
+    }, 750);
+
+    // Cleanup
+    return () => {
+      if (autosaveTimeoutRef.current) {
+        clearTimeout(autosaveTimeoutRef.current);
+      }
+    };
+  }, [content]);
+
+  // Listen for title changes and trigger autosave
+  useEffect(() => {
+    const titleInput = document.querySelector('input[name="title"]') as HTMLInputElement;
+
+    if (!titleInput) return;
+
+    const handleTitleChange = () => {
+      // Clear existing timeout
+      if (autosaveTimeoutRef.current) {
+        clearTimeout(autosaveTimeoutRef.current);
+      }
+
+      // Set new timeout for autosave (750ms)
+      autosaveTimeoutRef.current = setTimeout(() => {
+        performAutosave();
+      }, 750);
+    };
+
+    titleInput.addEventListener('input', handleTitleChange);
+
+    return () => {
+      titleInput.removeEventListener('input', handleTitleChange);
+    };
+  }, []);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {

@@ -101,3 +101,56 @@ export async function deleteNote(id: string) {
 
   redirect("/");
 }
+
+export async function autosaveNote(data: {
+  id?: string;
+  title: string;
+  content: string;
+}): Promise<{ success: boolean; id?: string; error?: string }> {
+  const { user } = await validateRequest();
+
+  if (!user) {
+    return { success: false, error: "Not authenticated" };
+  }
+
+  if (!data.title || !data.content) {
+    return { success: false, error: "Title and content are required" };
+  }
+
+  try {
+    if (data.id) {
+      // Update existing note
+      const note = await db.note.findFirst({
+        where: { id: data.id, userId: user.id },
+      });
+
+      if (!note) {
+        return { success: false, error: "Note not found" };
+      }
+
+      await db.note.update({
+        where: { id: data.id },
+        data: {
+          title: data.title,
+          content: data.content,
+        },
+      });
+
+      return { success: true, id: data.id };
+    } else {
+      // Create new note
+      const note = await db.note.create({
+        data: {
+          title: data.title,
+          content: data.content,
+          userId: user.id,
+        },
+      });
+
+      return { success: true, id: note.id };
+    }
+  } catch (error) {
+    console.error("Autosave error:", error);
+    return { success: false, error: "Failed to save note" };
+  }
+}
