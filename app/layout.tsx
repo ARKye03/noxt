@@ -4,6 +4,7 @@ import "./globals.css";
 import "highlight.js/styles/github-dark.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import { KeyboardShortcuts } from "@/components/keyboard-shortcuts";
+import { KeyboardShortcutsHelp } from "@/components/keyboard-shortcuts-help";
 import { Toaster } from "@/components/ui/sonner";
 
 const geistSans = Geist({
@@ -33,6 +34,7 @@ export default function RootLayout({
       >
         <ThemeProvider>
           <KeyboardShortcuts />
+          <KeyboardShortcutsHelp />
           {children}
           <Toaster />
         </ThemeProvider>

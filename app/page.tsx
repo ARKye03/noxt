@@ -35,7 +35,7 @@ export default async function Home() {
               <LogoutButton />
               <ThemeToggle />
             </div>
-            <p className="text-xs text-muted-foreground">Press N: New note • S: Search</p>
+            <p className="text-xs text-muted-foreground">Press N: New note • S: Search • ?: Help</p>
           </div>
         </div>
 
