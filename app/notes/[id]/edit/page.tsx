@@ -1,10 +1,6 @@
-import { getNote, updateNote } from "@/lib/actions/notes";
+import { getNote } from "@/lib/actions/notes";
 import { validateRequest } from "@/lib/auth";
 import { redirect } from "next/navigation";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { NoteEditor } from "@/components/note-editor";
 import { Button } from "@/components/ui/button";
 import { EditNoteForm } from "@/components/edit-note-form";
 import Link from "next/link";
