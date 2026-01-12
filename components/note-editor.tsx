@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { MarkdownPreview } from "@/components/markdown-preview";
@@ -25,7 +25,6 @@ export function NoteEditor({
 }) {
   const [content, setContent] = useState(initialContent || "");
   const [viewMode, setViewMode] = useState<ViewMode>("split");
-  const [isSaving, setIsSaving] = useState(false);
   const autosaveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const toastIdRef = useRef<string | number | undefined>(undefined);
   const currentNoteIdRef = useRef<string | undefined>(noteId);
@@ -36,15 +35,13 @@ export function NoteEditor({
   }, [noteId]);
 
   // Autosave function
-  const performAutosave = async () => {
+  const performAutosave = useCallback(async () => {
     const titleInput = document.querySelector('input[name="title"]') as HTMLInputElement;
     const title = titleInput?.value || "";
 
     if (!title.trim() || !content.trim()) {
       return;
     }
-
-    setIsSaving(true);
 
     // Show saving toast
     if (toastIdRef.current) {
@@ -74,13 +71,11 @@ export function NoteEditor({
         toast.error(result.error || "Failed to save note", { id: toastIdRef.current });
         toastIdRef.current = undefined;
       }
-    } catch (error) {
+    } catch {
       toast.error("Failed to save note", { id: toastIdRef.current });
       toastIdRef.current = undefined;
-    } finally {
-      setIsSaving(false);
     }
-  };
+  }, [content, tags, onNoteIdChange]);
 
   // Debounced autosave effect for content changes
   useEffect(() => {
@@ -100,7 +95,7 @@ export function NoteEditor({
         clearTimeout(autosaveTimeoutRef.current);
       }
     };
-  }, [content]);
+  }, [content, performAutosave]);
 
   // Listen for title changes and trigger autosave
   useEffect(() => {
@@ -125,7 +120,7 @@ export function NoteEditor({
     return () => {
       titleInput.removeEventListener('input', handleTitleChange);
     };
-  }, []);
+  }, [performAutosave]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {

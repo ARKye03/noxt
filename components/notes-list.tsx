@@ -36,17 +36,6 @@ export function NotesList({ notes }: { notes: Note[] }) {
     return Array.from(tagSet).sort();
   }, [notes]);
 
-  // Configure Fuse.js for fuzzy search
-  const fuse = useMemo(
-    () =>
-      new Fuse(notes, {
-        keys: ["title", "content"],
-        threshold: 0.3, // Lower = more strict, higher = more fuzzy
-        includeScore: true,
-      }),
-    [notes]
-  );
-
   // Filter notes based on search query and selected tag
   const filteredNotes = useMemo(() => {
     let filtered = notes;
